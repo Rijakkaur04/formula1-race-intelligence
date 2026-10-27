@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}F1 Race Intelligence{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300;400;600;700;900&display=swap" rel="stylesheet"/>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand">
+      <span class="f1-logo">F1</span>
+      <span class="brand-text">Race Intelligence</span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="{{ url_for('index') }}" {% if request.endpoint=='index' %}class="active"{% endif %}>🏠 Home</a></li>
+      <li><a href="{{ url_for('drivers') }}" {% if request.endpoint=='drivers' %}class="active"{% endif %}>🏎️ Drivers</a></li>
+      <li><a href="{{ url_for('constructors') }}" {% if request.endpoint=='constructors' %}class="active"{% endif %}>🔧 Constructors</a></li>
+      <li><a href="{{ url_for('circuits') }}" {% if request.endpoint=='circuits' %}class="active"{% endif %}>🌍 Circuits</a></li>
+      <li><a href="{{ url_for('strategy') }}" {% if request.endpoint=='strategy' %}class="active"{% endif %}>📊 Strategy</a></li>
+      <li><a href="{{ url_for('records') }}" {% if request.endpoint=='records' %}class="active"{% endif %}>🗃️ Explorer</a></li>
+      <li><a href="{{ url_for('performance') }}" {% if request.endpoint=='performance' %}class="active"{% endif %}>⚡ Performance</a></li>
+    </ul>
+  </nav>
+
+  <main class="main-content">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    <p>🏁 F1 Race Intelligence &copy; 2024 &mdash; Data Analytics Dashboard &mdash; Seasons 2010–2024</p>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

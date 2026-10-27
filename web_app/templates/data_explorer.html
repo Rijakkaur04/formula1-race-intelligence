@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Data Explorer — F1 Race Intelligence{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>🗃️ Interactive Data Explorer</h1>
+  <p>Browse all 3,424 race records — filter by season, driver, circuit</p>
+</div>
+
+<section class="section">
+  <div class="explorer-controls">
+    <input type="text" id="searchDriver" placeholder="🔍 Search driver..." class="search-box"/>
+    <select id="filterSeason" class="filter-select">
+      <option value="">All Seasons</option>
+      {% for yr in range(2010, 2025) %}<option value="{{ yr }}">{{ yr }}</option>{% endfor %}
+    </select>
+    <div class="download-group">
+      <a href="{{ url_for('download_csv') }}" class="btn-download">⬇ Raw Data CSV</a>
+      <a href="{{ url_for('download_driver_standings') }}" class="btn-download">⬇ Driver Standings</a>
+      <a href="{{ url_for('download_circuits') }}" class="btn-download">⬇ Circuit Analytics</a>
+    </div>
+  </div>
+
+  <div class="table-wrapper" style="max-height:600px;overflow-y:auto">
+    <table class="data-table" id="explorerTable">
+      <thead>
+        <tr>
+          <th>Season</th><th>Race</th><th>Circuit</th><th>Driver</th>
+          <th>Constructor</th><th>Grid</th><th>Finish</th><th>Points</th><th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="explorerBody">
+        {% for r in records %}
+        <tr class="data-row" data-driver="{{ r.driver | lower }}" data-season="{{ r.season }}">
+          <td>{{ r.season }}</td>
+          <td>{{ r.race }}</td>
+          <td>{{ r.circuit }}</td>
+          <td><strong>{{ r.driver }}</strong></td>
+          <td>{{ r.constructor }}</td>
+          <td>{{ r.grid }}</td>
+          <td>{{ r.finish }}</td>
+          <td class="pts">{{ r.points }}</td>
+          <td><span class="status-badge {% if r.status == 'Finished' %}status-ok{% else %}status-dnf{% endif %}">{{ r.status }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div id="recordCount" class="record-count">Showing {{ records | length }} records</div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const searchBox = document.getElementById('searchDriver');
+  const seasonFilter = document.getElementById('filterSeason');
+  function filterTable() {
+    const s = searchBox.value.toLowerCase();
+    const season = seasonFilter.value;
+    let count = 0;
+    document.querySelectorAll('.data-row').forEach(row => {
+      const dMatch = !s || row.dataset.driver.includes(s);
+      const sMatch = !season || row.dataset.season === season;
+      row.style.display = (dMatch && sMatch) ? '' : 'none';
+      if (dMatch && sMatch) count++;
+    });
+    document.getElementById('recordCount').textContent = `Showing ${count} records`;
+  }
+  searchBox.addEventListener('input', filterTable);
+  seasonFilter.addEventListener('change', filterTable);
+</script>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Constructor Standings — F1 Race Intelligence{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>🔧 Constructor Championship Standings</h1>
+  <p>Team performance battle across all seasons</p>
+</div>
+
+<section class="section">
+  <h2 class="section-title">Points by Constructor</h2>
+  <canvas id="constructorPointsChart" height="100"></canvas>
+</section>
+
+<section class="section">
+  <h2 class="section-title">Wins Distribution</h2>
+  <canvas id="constructorWinsChart" height="120"></canvas>
+</section>
+
+<section class="section">
+  <h2 class="section-title">📋 Constructor Table</h2>
+  <div class="table-wrapper">
+    <table class="data-table">
+      <thead>
+        <tr><th>Rank</th><th>Constructor</th><th>Total Points</th><th>Wins</th><th>Top Driver</th></tr>
+      </thead>
+      <tbody>
+        {% for c in constructors %}
+        <tr class="{% if loop.index <= 3 %}top-row{% endif %}">
+          <td><span class="rank-badge rank-{{ loop.index }}">{{ c.rank }}</span></td>
+          <td><strong>{{ c.constructor }}</strong></td>
+          <td class="pts">{{ c.points }}</td>
+          <td>{{ c.wins }}</td>
+          <td>{{ c.drivers }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  fetch('/api/charts/constructor-points').then(r=>r.json()).then(d=>{
+    new Chart(document.getElementById('constructorPointsChart'),{type:'bar',data:{labels:d.labels,datasets:[{label:'Total Points',data:d.data,backgroundColor:['#e10600','#00D2BE','#FF8700','#DC0000','#0090FF','#006EFF','#FF2020','#C0C0C0','#229971','#B6BABD'],borderRadius:6}]},options:{responsive:true,plugins:{legend:{labels:{color:'#fff'}}},scales:{x:{ticks:{color:'#ccc'},grid:{color:'#333'}},y:{ticks:{color:'#ccc'},grid:{color:'#333'}}}}});
+    new Chart(document.getElementById('constructorWinsChart'),{type:'doughnut',data:{labels:d.labels,datasets:[{data:d.wins,backgroundColor:['#e10600','#00D2BE','#FF8700','#DC0000','#0090FF','#006EFF','#FF2020','#C0C0C0','#229971','#B6BABD'],borderWidth:2,borderColor:'#1a1a2e'}]},options:{responsive:true,plugins:{legend:{labels:{color:'#fff'}}}}});
+  });
+</script>
+{% endblock %}

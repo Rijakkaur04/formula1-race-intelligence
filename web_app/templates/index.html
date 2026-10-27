@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}F1 Race Intelligence — Home{% endblock %}
+
+{% block content %}
+<div class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">🏁 DATA ANALYTICS DASHBOARD</div>
+    <h1 class="hero-title">Formula 1<br><span class="highlight">Race Intelligence</span></h1>
+    <p class="hero-subtitle">15 Seasons · {{ stats.total_records | default(3424) }} Race Records · {{ stats.total_circuits | default(22) }} Circuits · {{ stats.total_drivers | default(20) }} Drivers</p>
+    <div class="hero-actions">
+      <a href="{{ url_for('drivers') }}" class="btn-primary">Explore Drivers</a>
+      <a href="{{ url_for('records') }}" class="btn-secondary">Browse Data</a>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="speed-lines"></div>
+    <div class="f1-car-icon">🏎️</div>
+  </div>
+</div>
+
+<!-- KPI Cards -->
+<section class="kpi-section">
+  <div class="kpi-grid">
+    <div class="kpi-card red">
+      <div class="kpi-icon">🏆</div>
+      <div class="kpi-value">{{ stats.total_races | default(263) }}</div>
+      <div class="kpi-label">Total Races</div>
+      <div class="kpi-sub">{{ stats.seasons | default('2010–2024') }}</div>
+    </div>
+    <div class="kpi-card dark">
+      <div class="kpi-icon">🏎️</div>
+      <div class="kpi-value">{{ stats.total_drivers | default(20) }}</div>
+      <div class="kpi-label">Drivers Analysed</div>
+      <div class="kpi-sub">Elite Grid</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-icon">🌍</div>
+      <div class="kpi-value">{{ stats.total_circuits | default(22) }}</div>
+      <div class="kpi-label">Race Circuits</div>
+      <div class="kpi-sub">Global Calendar</div>
+    </div>
+    <div class="kpi-card dark">
+      <div class="kpi-icon">📊</div>
+      <div class="kpi-value">{{ stats.total_records | default(3424) }}</div>
+      <div class="kpi-label">Data Records</div>
+      <div class="kpi-sub">Full Dataset</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-icon">👑</div>
+      <div class="kpi-value small">{{ stats.champion_2024 | default('Max Verstappen') }}</div>
+      <div class="kpi-label">2024 Champion</div>
+      <div class="kpi-sub">World Champion</div>
+    </div>
+    <div class="kpi-card dark">
+      <div class="kpi-icon">🔧</div>
+      <div class="kpi-value small">{{ stats.constructor_2024 | default('Red Bull') }}</div>
+      <div class="kpi-label">Constructor Champion</div>
+      <div class="kpi-sub">2024 Season</div>
+    </div>
+  </div>
+</section>
+
+<!-- Top Drivers Preview -->
+<section class="section">
+  <h2 class="section-title">🏆 Top Drivers — All-Time Points</h2>
+  <canvas id="topDriversChart" height="100"></canvas>
+</section>
+
+<!-- Season Trajectory -->
+<section class="section">
+  <h2 class="section-title">📈 Season Points Trajectory — Top 5 Drivers</h2>
+  <canvas id="seasonTrajectoryChart" height="120"></canvas>
+</section>
+
+<!-- Quick Links -->
+<section class="section quick-links">
+  <h2 class="section-title">⚡ Quick Access</h2>
+  <div class="card-grid">
+    <a href="{{ url_for('drivers') }}" class="quick-card">
+      <span class="qc-icon">🏎️</span>
+      <span class="qc-title">Driver Standings</span>
+      <span class="qc-desc">Championship rankings & stats</span>
+    </a>
+    <a href="{{ url_for('constructors') }}" class="quick-card">
+      <span class="qc-icon">🔧</span>
+      <span class="qc-title">Constructors</span>
+      <span class="qc-desc">Team performance analysis</span>
+    </a>
+    <a href="{{ url_for('circuits') }}" class="quick-card">
+      <span class="qc-icon">🌍</span>
+      <span class="qc-title">Circuit Analytics</span>
+      <span class="qc-desc">Overtakes & DNF rates by track</span>
+    </a>
+    <a href="{{ url_for('strategy') }}" class="quick-card">
+      <span class="qc-icon">🎯</span>
+      <span class="qc-title">Tyre Strategy</span>
+      <span class="qc-desc">Compound usage & pit stops</span>
+    </a>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  fetch('/api/charts/driver-points').then(r=>r.json()).then(d=>{
+    new Chart(document.getElementById('topDriversChart'), {
+      type: 'bar',
+      data: {
+        labels: d.labels,
+        datasets: [{
+          label: 'Total Championship Points',
+          data: d.data,
+          backgroundColor: ['#e10600','#dc143c','#ff4444','#ff6666','#ff8888','#ffaaaa','#cc0000','#990000','#770000','#550000'],
+          borderRadius: 6,
+        }]
+      },
+      options: { responsive: true, plugins: { legend: { labels: { color: '#fff' } } }, scales: { x: { ticks: { color: '#ccc' }, grid: { color: '#333' } }, y: { ticks: { color: '#ccc' }, grid: { color: '#333' } } } }
+    });
+  });
+
+  fetch('/api/charts/season-trajectory').then(r=>r.json()).then(d=>{
+    new Chart(document.getElementById('seasonTrajectoryChart'), {
+      type: 'line',
+      data: { labels: d.seasons, datasets: d.datasets.map(ds=>({...ds, tension:0.4, fill:false})) },
+      options: { responsive: true, plugins: { legend: { labels: { color: '#fff' } } }, scales: { x: { ticks: { color: '#ccc' }, grid: { color: '#333' } }, y: { ticks: { color: '#ccc' }, grid: { color: '#333' } } } }
+    });
+  });
+</script>
+{% endblock %}

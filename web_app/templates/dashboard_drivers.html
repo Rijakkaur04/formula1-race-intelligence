@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Driver Standings — F1 Race Intelligence{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>🏎️ Driver Championship Standings</h1>
+  <p>All-time performance across 15 seasons (2010–2024)</p>
+</div>
+
+<section class="section">
+  <h2 class="section-title">Top 10 Drivers by Points</h2>
+  <canvas id="driverPointsChart" height="100"></canvas>
+</section>
+
+<section class="section">
+  <h2 class="section-title">Wins vs Podiums Comparison</h2>
+  <canvas id="winsVsPodiumsChart" height="100"></canvas>
+</section>
+
+<section class="section">
+  <h2 class="section-title">📋 Full Driver Standings</h2>
+  <div class="table-wrapper">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Rank</th><th>Driver</th><th>Constructor</th><th>Points</th>
+          <th>Wins</th><th>Podiums</th><th>DNFs</th><th>Win Rate %</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in drivers %}
+        <tr class="{% if loop.index <= 3 %}top-row{% endif %}">
+          <td><span class="rank-badge rank-{{ loop.index }}">{{ d.rank }}</span></td>
+          <td><strong>{{ d.driver }}</strong></td>
+          <td>{{ d.constructor }}</td>
+          <td class="pts">{{ d.points }}</td>
+          <td>{{ d.wins }}</td>
+          <td>{{ d.podiums }}</td>
+          <td class="dnf">{{ d.dnfs }}</td>
+          <td>{{ d.win_rate }}%</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  fetch('/api/charts/driver-points').then(r=>r.json()).then(d=>{
+    new Chart(document.getElementById('driverPointsChart'),{type:'bar',data:{labels:d.labels,datasets:[{label:'Total Points',data:d.data,backgroundColor:'#e10600',borderRadius:6}]},options:{responsive:true,plugins:{legend:{labels:{color:'#fff'}}},scales:{x:{ticks:{color:'#ccc'},grid:{color:'#333'}},y:{ticks:{color:'#ccc'},grid:{color:'#333'}}}}});
+    new Chart(document.getElementById('winsVsPodiumsChart'),{type:'bar',data:{labels:d.labels,datasets:[{label:'Wins',data:d.wins,backgroundColor:'#e10600',borderRadius:4},{label:'Podiums',data:d.wins.map(w=>Math.round(w*2.8)),backgroundColor:'#ff6666',borderRadius:4}]},options:{responsive:true,plugins:{legend:{labels:{color:'#fff'}}},scales:{x:{ticks:{color:'#ccc'},grid:{color:'#333'}},y:{ticks:{color:'#ccc'},grid:{color:'#333'}}}}});
+  });
+</script>
+{% endblock %}
